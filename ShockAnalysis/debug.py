@@ -4,8 +4,10 @@ from pymatgen.io.lammps.outputs import LammpsDump
 from io import StringIO
 from glob import glob
 #%%
-path_to_lammps_dump = glob('/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/NVT_capped/orientation_shock_50-50-500_v7/B11-Cp-CBC/0/mid_chain/0.0/shock_-25.0_data/dump.data_shock_chunk_-25.0')
 
+#example file path
+file_pattern = '/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/NVT_capped/orientation_shock_50-50-500_v7/B11-Cp-CBC/0/mid_chain/0.0/shock_-25.0_data/dump.data_shock_chunk_-25.0'
+path_to_lammps_dump = glob(file_pattern)
 
 files = []
 for f in path_to_lammps_dump:
@@ -17,8 +19,7 @@ for f in path_to_lammps_dump:
         files.append(f)
 #%% find bad data
 
-def filter_files(files,vel_list=[25.0,20.0,30.0], vac_list=[0.005,0.01,0.05,0.1],polytype_list = ['B11-Ce-CBC','B11-Cp-CBC','B12-CCC','B12-CBC']):
-   
+def filter_files(files,vel_list=[25.0,20.0,30.0], vac_list=[0.005,0.01,0.05,0.1],polytype_list = ['B11-Ce-CBC','B11-Cp-CBC','B12-CCC','B12-CBC']): 
     filtered_files = []
     for f in files:
         polytype = f.split('/')[-4]

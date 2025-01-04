@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objs as go
 import plotly.io as pio
 import subprocess
 pio.renderers.default = 'notebook'
@@ -24,19 +25,6 @@ import numpy as np
 from scipy.stats import linregress
 from scipy.ndimage import gaussian_filter1d
 
-academic_colors = [
-    "#000000",  # Black
-    "#E24A33",  # Red
-    "#348ABD",  # Blue
-    "#8EBA42",  # Green
-    "#988ED5",  # Purple
-    "#FBC15E",  # Orange
-    "#00C2F9",  # Cyan
-    "#1F77B4",  # Dark Blue
-    "#2CA02C",  # Dark Green
-    "#D62728",  # Dark Red
-    "#FFD700"   # Gold
-]
 
 #Set up logger 
 #----“----------------------------------------------
@@ -53,9 +41,23 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 # Set up plotly figure layout template
-import plotly.graph_objs as go
 
-# Define a layout template for academic plots
+#define custom colorway for plots
+academic_colors = [
+    "#000000",  # Black
+    "#E24A33",  # Red
+    "#348ABD",  # Blue
+    "#8EBA42",  # Green
+    "#988ED5",  # Purple
+    "#FBC15E",  # Orange
+    "#00C2F9",  # Cyan
+    "#1F77B4",  # Dark Blue
+    "#2CA02C",  # Dark Green
+    "#D62728",  # Dark Red
+    "#FFD700"   # Gold
+]
+
+# Define a layout template for plots
 academic_template = {
     'layout': go.Layout(
         title={
@@ -137,9 +139,6 @@ academic_template = {
         colorway=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'],
     )
 }
-
-
-
 
 #Data reading and parsing scripts helper functions
 #--------------------------------------------------
@@ -284,89 +283,6 @@ def extract_meta_from_log(path_to_log):
 
     return velocity, timestep*1000
 
-# Main wrappers for processing dump files
-#--------------------------------------------------
-#convert dump file to dictionary of dataframes with each key being the simulation time
-# def process_dump_file(path_to_dump_file,num_bins=100,units='metal',filename=None,timestep=0.2):
-#     """
-#     Processes data from a parents directory containing a dump file and log file. Outputs a dictionary for each impact velocity, with each timestep as keys used to access the database.
-
-#     Input:
-#         path_to_dump_dir (str): path to the directory containing the dump file and log file
-#         num_bins (int): number of bins to divide the data into
-#         units (str): units of the data. Options: 'metal', 'real'
-#         filename (str): file path/name to save resulting dictionary to (optional)
-
-#     Output:
-#         dict: nested dictionary containing a pandas DataFrame for each snapshot in dump_list. The snapshots timesteps in fs are keys.
-#         (polytype,vac_frac,impact_velocity) : metadata tuple
-
-#     """
-
-#     # /home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/vacancy_shock/B11-Ce-CBC/0.01/shock_-5.0_data/dump.data_shock_chunk_-5.0
-    
-#     # if len(path_to_dump_file) > 1:
-#     #     #dump files are one-per-timestep
-#     #     #make path_to_dump_file a file pattern
-#     #     path_to_dump_file = os.path.join(path_to_dump_dir,'dump.*')
-#     path_to_dump_dir = path_to_dump_file.split('dump.data_shock_chunk')[0] 
-#     path_to_log = glob(os.path.join(path_to_dump_dir,'log.*'))[0] 
-
-#     # Read the dump file
-#     try:
-#         dump_list = [i for i in parse_lammps_dumps(path_to_dump_file)]
-#     except Exception as e:
-#         logger.error(f"Error reading dump file: {e}")
-#         logger.error(f"Path to dump file: {path_to_dump_file}")
-#         return None
-    
-#     # Extract information from path name and log file 
-#     #--------------------------------------------------
-#     polytype = path_to_dump_file.split('/')[-4]
-#     vac_frac = float(path_to_dump_file.split('/')[-3])
-
-#     try:
-#         impact_velocity = float(path_to_dump_file.split('/')[-1].split('_')[-1])
-#     except Exception as e:
-#         logger.warning(f"Error extracting impact velocity: {e}")
-#         logger.warning("Extracting impact velocity from log file...")
-#         try: 
-#             # impact_velocity = extract_meta_from_log(path_to_log)[0]
-#             None
-#         except Exception as e:
-#             logger.error(f"Error extracting impact velocity from log file: {e}")
-#             raise e
-    
-#     # Get the timestep from log file in same directory
-#     # timestep = extract_meta_from_log(path_to_log)[1]
-    
-
-#     # Convert to correct units
-#     #--------------------------------------------------
-#     if units == 'metal':
-#         #output convert ps to fs
-#         # timestep = timestep * 1000
-#         impact_velocity = impact_velocity / 10
-#     elif units == 'real':
-#         #time is already in fs 
-#         impact_velocity = impact_velocity / 100
-#     else:
-#         logger.error(f"Units not recognized: {units}")
-#         return None
-        
-    
-#     # Parse the dump file into a dataframe and then bin
-#     #--------------------------------------------------
-
-#     df = get_dfs(
-#         dump_list,
-#         filename=filename,
-#         num_bins=num_bins,
-#         ts=timestep
-#         )
-
-#     return df,(polytype,vac_frac,impact_velocity) 
-
 # from a list of properties, extract the file path to the dump file fitting the requested conditions
 def get_file_list(vel_list,polytype_list,vac_frac_list,parent_dir='/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/vacancy_shock'):
     fs = []
@@ -402,42 +318,6 @@ def get_file_list(vel_list,polytype_list,vac_frac_list,parent_dir='/home/kimia.g
                 logger.warning(f'       {vel}')
     return fs        
 
-# from a list of properties, output a nested dictionary with all the requested data
-# def get_all_data(vel_list,polytype_list,vac_frac_list,parent_dir='/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/vacancy_shock',filename=None):
-#     fs = get_file_list(vel_list,polytype_list,vac_frac_list,parent_dir)
-    
-#     data = {}
-#     for dir_path in tqdm(fs,desc='Processing dump files',bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt}\nEstimated time remaining: {remaining}'):
-#         #extract dict of snap
-#         try:
-#             df,(polytype,vac_frac,impact_velocity) = process_dump_file(dir_path,num_bins=100,units='metal')
-#             logger.info(f'Processed {dir_path}')
-#             #initialize polytype if not yet in data dictionary
-#             if polytype not in data.keys():
-#                 data[polytype] = {}
-
-#             if vac_frac not in data[polytype].keys():
-#                 data[polytype][vac_frac] = {}
-            
-#             data[polytype][vac_frac][impact_velocity] = df
-#         except Exception as e:
-#             logger.warning('Bad file: ',dir_path)
-#             logger.error(f"Error processing dump file: {e}")
-#             logger.error(f"Path to dump file: {dir_path}")
-#             continue
-        
-#     if len(data) == 0:
-#         logger.warning('No data found')
-#         logger.warning(fs)
-#         print('no data found')
-        
-    
-#     if filename:
-#         with gzip.open(filename, 'wb') as f:
-#             pickle.dump(data,f,protocol=pickle.HIGHEST_PROTOCOL)
-#         logger.info(f'Data written to: {filename}')
-#         print('Data saved')
-#     return data
 
 # Compute properties from data 
 #--------------------------------------------------
@@ -843,3 +723,5 @@ class SimulationDump:
         
         return fig
         
+
+# %%

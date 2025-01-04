@@ -1,0 +1,78 @@
+{
+title={
+    'font': {
+        'family': 'Arial, sans-serif',
+        'size': 18,
+        'color': '#333'
+    },
+    'x': 0.5,  # Center the title
+    'xanchor': 'center'
+},
+xaxis={
+    'title': {
+        'font': {
+            'family': 'Arial, sans-serif',
+            'size': 14,
+            'color': '#333'
+        }
+    },
+    'tickfont': {
+        'family': 'Arial, sans-serif',
+        'size': 12,
+        'color': '#333'
+    },
+    'linecolor': 'black',
+    'ticks': 'outside',
+    'showline': True,
+    'mirror': 'ticks',
+    'showgrid': False
+},
+yaxis={
+    'title': {
+        'font': {
+            'family': 'Arial, sans-serif',
+            'size': 14,
+            'color': '#333'
+        }
+    },
+    'tickfont': {
+        'family': 'Arial, sans-serif',
+        'size': 12,
+        'color': '#333'
+    },
+    'linecolor': 'black',
+    'ticks': 'outside',
+    'showline': True,
+    'mirror': 'ticks',
+    'showgrid': False
+},
+plot_bgcolor='white',
+margin={
+    'l': 60,
+    'r': 20,
+    't': 40,
+    'b': 60
+},
+legend={
+    'font': {
+        'family': 'Arial, sans-serif',
+        'size': 12,
+        'color': '#333'
+    },
+    'bordercolor': '#E1E1E1',
+    'borderwidth': 1,
+    'x': 1,
+    'y': 1,
+    'xanchor': 'right',
+    'yanchor': 'top'
+},
+width=600,
+height=400,
+hoverlabel={
+    'font': {
+        'family': 'Arial, sans-serif',
+        'size': 12,
+        'color': '#333'
+    }
+}
+}
