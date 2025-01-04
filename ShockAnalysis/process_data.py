@@ -21,47 +21,6 @@ file_handler = logging.FileHandler('logs/processing_data.log','w+')
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
-
-# %%
-fs = glob('/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/orientation_shock_50-50-1000/B*/*/*/*/shock_*/dump.data_*')
-
-processed = glob('/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/orientation_shock_50-50-1000/B*/*/*/*/shock_*/processed_*')
-logger.info(f'Found {len(fs)} dump files')
-logger.info(f'Found {len(processed)} processed files')
-
-#%%
-#find completed runs based on their logfile
-completed = []
-incomplete = []
-
-for f in fs:
-    dir_path = f.split(f.split('/')[-1])[0]
-    log_file = glob(f'{dir_path}/log.*')[0]
-
-    with open(log_file) as fl:
-        lines = fl.readlines()
-        if len(lines) > 0 and 'log             log.B' in lines[-1] or 'Total wall time' in lines[-1]:    
-            completed.append(f)
-            #create a "DONE" file
-            with open(f'{dir_path}/DONE', 'w') as fl:
-                fl.write('DONE')
-        else:
-            for l in lines[-100:]:
-                if 'Loop time' in l:
-                    completed.append(f)
-                    #create a "DONE" file
-                    with open(f'{dir_path}/DONE', 'w') as fl:
-                        fl.write('DONE') 
-                    break
-                elif l == lines[-1]:
-                    incomplete.append(f)
-                    
-            
-
-num_unproc = len(fs) - len(processed)
-logger.info(f'Files to process: {num_unproc}')
-
-
 #%%
 def file_list(fs):
     files = pd.DataFrame()
@@ -94,9 +53,6 @@ def file_list(fs):
         
     return files
 
-files = file_list(fs)
-files.set_index(['polytype','angle','removal','vac_frac'],inplace=True)
-logger.info(f'{files}')
 # %%
 def process_file(file):
     dir_path = file.split(file.split('/')[-1])[0]
@@ -113,12 +69,96 @@ def process_file(file):
         print(e)
         logger.error(f'Error in file {file_name} with error {e}')
 
-for f in tqdm(completed, desc='Processing files'):
-    process_file(f)
-# %%
-# with multiprocessing.Pool(processes=8) as pool:
-#     results = list(tqdm(pool.imap_unordered(process_file, completed), total=len(completed), desc="Processing"))
+def analyze_files(fs):
+    processed = glob('/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/orientation_shock_50-50-1000/B*/*/*/*/shock_*/processed_*')
+    logger.info(f'Found {len(fs)} dump files')
+    logger.info(f'Found {len(processed)} processed files')
+
+    #find completed runs based on their logfile
+    completed = []
+    incomplete = []
+
+    for f in fs:
+        dir_path = f.split(f.split('/')[-1])[0]
+        log_file = glob(f'{dir_path}/log.*')[0]
+
+        with open(log_file) as fl:
+            lines = fl.readlines()
+            if len(lines) > 0 and 'log             log.B' in lines[-1] or 'Total wall time' in lines[-1]:    
+                completed.append(f)
+                #create a "DONE" file
+                with open(f'{dir_path}/DONE', 'w') as fl:
+                    fl.write('DONE')
+            else:
+                for l in lines[-100:]:
+                    if 'Loop time' in l:
+                        completed.append(f)
+                        #create a "DONE" file
+                        with open(f'{dir_path}/DONE', 'w') as fl:
+                            fl.write('DONE') 
+                        break
+                    elif l == lines[-1]:
+                        incomplete.append(f)
+                        
+                
+
+    num_unproc = len(fs) - len(processed)
+    logger.info(f'Files to process: {num_unproc}')
+    
+    
+    files = file_list(fs)
+    files.set_index(['polytype','angle','removal','vac_frac'],inplace=True)
+    logger.info(f'{files}')
+    
+    for f in tqdm(completed, desc='Processing files'):
+        process_file(f)
 
 # %%
-# 
-# %%
+if __name__ == '__main__':
+    
+    fs = glob('/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/orientation_shock_50-50-1000/B*/*/*/*/shock_*/dump.data_*')
+
+    processed = glob('/home/kimia.gh/blue2/B4C_ML_Potential/B4C_LAMMPS/DPMD_GPU/orientation_shock_50-50-1000/B*/*/*/*/shock_*/processed_*')
+    logger.info(f'Found {len(fs)} dump files')
+    logger.info(f'Found {len(processed)} processed files')
+
+    #find completed runs based on their logfile
+    completed = []
+    incomplete = []
+
+    for f in fs:
+        dir_path = f.split(f.split('/')[-1])[0]
+        log_file = glob(f'{dir_path}/log.*')[0]
+
+        with open(log_file) as fl:
+            lines = fl.readlines()
+            if len(lines) > 0 and 'log             log.B' in lines[-1] or 'Total wall time' in lines[-1]:    
+                completed.append(f)
+                #create a "DONE" file
+                with open(f'{dir_path}/DONE', 'w') as fl:
+                    fl.write('DONE')
+            else:
+                for l in lines[-100:]:
+                    if 'Loop time' in l:
+                        completed.append(f)
+                        #create a "DONE" file
+                        with open(f'{dir_path}/DONE', 'w') as fl:
+                            fl.write('DONE') 
+                        break
+                    elif l == lines[-1]:
+                        incomplete.append(f)
+                        
+                
+
+    num_unproc = len(fs) - len(processed)
+    logger.info(f'Files to process: {num_unproc}')
+    
+    
+    files = file_list(fs)
+    files.set_index(['polytype','angle','removal','vac_frac'],inplace=True)
+    logger.info(f'{files}')
+    
+    for f in tqdm(completed, desc='Processing files'):
+        process_file(f)
+
+
